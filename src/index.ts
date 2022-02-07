@@ -356,7 +356,7 @@ class SenseiClient {
           isUsable: channel.is_usable,
           isPublic: channel.is_public,
           counterpartyPubkey: channel.counterparty_pubkey,
-          alias: channel.channel.alias,
+          alias: channel.alias,
         };
       }),
       pagination,
