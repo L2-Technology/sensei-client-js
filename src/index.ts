@@ -89,6 +89,19 @@ export interface Channel {
   alias?: string;
 }
 
+export interface BlockTime {
+  height: number;
+  timestamp: number;
+}
+
+export interface TransactionDetails {
+  txid: string;
+  received: number;
+  sent: number;
+  fee?: number;
+  confirmationTime?: BlockTime;
+}
+
 export interface GetNodesResponse {
   nodes: Node[];
   pagination: PaginationResponse;
@@ -96,6 +109,11 @@ export interface GetNodesResponse {
 
 export interface GetChannelsResponse {
   channels: Channel[];
+  pagination: PaginationResponse;
+}
+
+export interface GetTransactionsResponse {
+  transactions: TransactionDetails[];
   pagination: PaginationResponse;
 }
 
@@ -357,6 +375,25 @@ class SenseiClient {
           isPublic: channel.is_public,
           counterpartyPubkey: channel.counterparty_pubkey,
           alias: channel.alias,
+        };
+      }),
+      pagination,
+    };
+  }
+
+  async getTransactions({ page, searchTerm, take }: ListParams): Promise<GetTransactionsResponse> {
+    const { transactions, pagination } = await this.get(
+      `${this.basePath}/v1/node/transactions?page=${page}&take=${take}&query=${searchTerm}`,
+    );
+
+    return {
+      transactions: transactions.map((transaction: any) => {
+        return {
+          txid: transaction.txid,
+          sent: transaction.sent,
+          received: transaction.received,
+          fee: transaction.fee,
+          confirmationTime: transaction.confirmation_time,
         };
       }),
       pagination,
