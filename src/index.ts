@@ -5,10 +5,6 @@ export interface SenseiClientConfig {
   macaroon?: string;
 }
 
-export interface SenseiConfig {
-  electrumUrl: string;
-}
-
 export interface NodeStatus {
   created: boolean;
   running: boolean;
@@ -23,7 +19,6 @@ export interface InitParams {
   username: string;
   alias: string;
   passphrase: string;
-  electrumUrl: string;
   start: boolean;
 }
 
@@ -246,29 +241,15 @@ class SenseiClient {
     });
   }
 
-  async getConfig(): Promise<SenseiConfig> {
-    const config = await this.get(`${this.basePath}/v1/config`);
-    return {
-      electrumUrl: config.electrum_url,
-    };
-  }
-
-  updateConfig({ electrumUrl }: SenseiConfig): Promise<void> {
-    return this.post(`${this.basePath}/v1/config`, {
-      electrum_url: electrumUrl,
-    });
-  }
-
   getStatus(): Promise<NodeStatus> {
     return this.get(`${this.basePath}/v1/status`);
   }
 
-  async init({ username, alias, passphrase, electrumUrl, start }: InitParams): Promise<InitResponse> {
+  async init({ username, alias, passphrase, start }: InitParams): Promise<InitResponse> {
     const response = await this.post(`${this.basePath}/v1/init`, {
       username,
       alias,
       passphrase,
-      electrum_url: electrumUrl,
       start,
     });
     return {
