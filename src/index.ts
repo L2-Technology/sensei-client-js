@@ -347,6 +347,7 @@ class SenseiClient {
       tokens: tokens.map((token: any) => {
         return {
           id: token.id,
+          token: token.token,
           externalId: token.external_id,
           createdAt: token.created_at,
           updatedAt: token.updated_at,
