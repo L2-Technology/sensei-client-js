@@ -3,6 +3,7 @@ import fetch from 'cross-fetch';
 export interface SenseiClientConfig {
   basePath: string;
   macaroon?: string;
+  token?: string;
 }
 
 export interface NodeStatus {
@@ -25,6 +26,7 @@ export interface InitParams {
 export interface InitResponse {
   pubkey: string;
   macaroon: string;
+  token: string;
   externalId: string;
   role: number;
 }
@@ -32,6 +34,7 @@ export interface InitResponse {
 export interface LoginResponse {
   pubkey: string;
   macaroon: string;
+  token: string;
   alias: string;
   role: number;
 }
@@ -39,6 +42,25 @@ export interface LoginResponse {
 export interface NodeAuthInfo {
   pubkey: string;
   macaroon: string;
+}
+
+export interface CreateAccessTokenParams {
+  name: string;
+  scope: string;
+  expiresAt: number;
+  singleUse: boolean;
+}
+
+export interface AccessToken {
+  id: number;
+  externalId: string;
+  createdAt: string;
+  updatedAt: string;
+  expiresAt: number;
+  singleUse: boolean;
+  name: string;
+  token: string;
+  scope: string;
 }
 
 export interface CreateNodeParams {
@@ -99,6 +121,11 @@ export interface TransactionDetails {
 
 export interface GetNodesResponse {
   nodes: Node[];
+  pagination: PaginationResponse;
+}
+
+export interface GetAccessTokensResponse {
+  tokens: AccessToken[];
   pagination: PaginationResponse;
 }
 
@@ -188,25 +215,38 @@ export type ListParams = PaginationParams & SearchableParams;
 class SenseiClient {
   basePath: string;
   macaroon?: string;
+  token?: string;
 
-  constructor({ basePath, macaroon }: SenseiClientConfig) {
+  constructor({ basePath, macaroon, token }: SenseiClientConfig) {
     this.basePath = basePath;
     this.macaroon = macaroon;
+    this.token = token;
   }
 
   setMacaroon(macaroon: string) {
     this.macaroon = macaroon;
   }
 
-  async request(input: RequestInfo, init: RequestInit): Promise<any> {
-    if (this.macaroon && this.macaroon !== '') {
-      if (!init.headers) {
-        init.headers = {};
-      }
+  setToken(token: string) {
+    this.token = token;
+  }
 
+  async request(input: RequestInfo, init: RequestInit): Promise<any> {
+    if (!init.headers) {
+      init.headers = {};
+    }
+
+    if (this.macaroon && this.macaroon !== '') {
       init.headers = {
         ...init.headers,
         macaroon: this.macaroon,
+      };
+    }
+
+    if (this.token && this.token !== '') {
+      init.headers = {
+        ...init.headers,
+        token: this.token,
       };
     }
 
@@ -225,6 +265,18 @@ class SenseiClient {
   post(url: string, body: Record<any, any>, additionalHeaders: Record<any, any> = {}): Promise<any> {
     return this.request(url, {
       method: 'POST',
+      headers: {
+        ...additionalHeaders,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(body),
+    });
+  }
+
+  delete(url: string, body: Record<any, any>, additionalHeaders: Record<any, any> = {}): Promise<any> {
+    return this.request(url, {
+      method: 'DELETE',
       headers: {
         ...additionalHeaders,
         'Content-Type': 'application/json',
@@ -257,6 +309,7 @@ class SenseiClient {
       macaroon: response.macaroon,
       externalId: response.external_id,
       role: response.role,
+      token: response.token,
     };
   }
 
@@ -274,6 +327,41 @@ class SenseiClient {
 
   async stopAdmin(): Promise<void> {
     return this.get(`${this.basePath}/v1/stop`);
+  }
+
+  async createAccessToken({ name, scope, singleUse, expiresAt }: CreateAccessTokenParams): Promise<AccessToken> {
+    return this.post(`${this.basePath}/v1/tokens`, {
+      name,
+      scope,
+      single_use: singleUse,
+      expires_at: expiresAt,
+    });
+  }
+
+  async getAccessTokens({ page, searchTerm, take }: ListParams): Promise<GetAccessTokensResponse> {
+    const { tokens, pagination } = await this.get(
+      `${this.basePath}/v1/tokens?page=${page}&take=${take}&query=${searchTerm}`,
+    );
+
+    return {
+      tokens: tokens.map((token: any) => {
+        return {
+          id: token.id,
+          externalId: token.external_id,
+          createdAt: token.created_at,
+          updatedAt: token.updated_at,
+          expiresAt: token.expires_at,
+          singleUse: token.single_use,
+          scope: token.scope,
+          name: token.name,
+        };
+      }),
+      pagination,
+    };
+  }
+
+  async deleteAccessToken(id: number): Promise<void> {
+    return this.delete(`${this.basePath}/v1/tokens`, { id });
   }
 
   async createNode({ username, alias, passphrase, start }: CreateNodeParams): Promise<NodeAuthInfo> {
