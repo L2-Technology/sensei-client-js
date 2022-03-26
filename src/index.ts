@@ -357,7 +357,10 @@ class SenseiClient {
           name: token.name,
         };
       }),
-      pagination,
+      pagination: {
+        ...pagination,
+        hasMore: pagination.has_more,
+      },
     };
   }
 
@@ -415,7 +418,10 @@ class SenseiClient {
           status: node.status,
         };
       }),
-      pagination,
+      pagination: {
+        ...pagination,
+        hasMore: pagination.has_more,
+      },
     };
   }
 
@@ -447,7 +453,10 @@ class SenseiClient {
           alias: channel.alias,
         };
       }),
-      pagination,
+      pagination: {
+        ...pagination,
+        hasMore: pagination.has_more,
+      },
     };
   }
 
@@ -466,7 +475,10 @@ class SenseiClient {
           confirmationTime: transaction.confirmation_time,
         };
       }),
-      pagination,
+      pagination: {
+        ...pagination,
+        hasMore: pagination.has_more,
+      },
     };
   }
 
