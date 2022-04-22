@@ -210,6 +210,11 @@ export interface Invoice {
   invoice: string;
 }
 
+export interface VerifyMessageResponse {
+  valid: boolean;
+  pubkey: string;
+}
+
 export type ListParams = PaginationParams & SearchableParams;
 
 class SenseiClient {
@@ -618,6 +623,13 @@ class SenseiClient {
       message,
     });
     return response.signature;
+  }
+
+  async verifyMessage(message: string, signature: string): Promise<VerifyMessageResponse> {
+    return this.post(`${this.basePath}/v1/node/verify/message`, {
+      message,
+      signature,
+    });
   }
 }
 
