@@ -25,10 +25,10 @@ export interface InitParams {
 }
 
 export interface InitResponse {
+  id: string;
   pubkey: string;
   macaroon: string;
   token: string;
-  externalId: string;
   role: number;
 }
 
@@ -53,10 +53,9 @@ export interface CreateAccessTokenParams {
 }
 
 export interface AccessToken {
-  id: number;
-  externalId: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string;
+  createdAt: number;
+  updatedAt: number;
   expiresAt: number;
   singleUse: boolean;
   name: string;
@@ -72,8 +71,7 @@ export interface CreateNodeParams {
 }
 
 export interface Node {
-  id: number;
-  externalId: string;
+  id: string;
   role: number;
   username: string;
   alias: string;
@@ -81,8 +79,8 @@ export interface Node {
   listenAddr: string;
   listenPort: number;
   pubkey: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: number;
+  updatedAt: number;
   status: number;
 }
 
@@ -141,15 +139,16 @@ export interface GetTransactionsResponse {
 }
 
 export interface Payment {
-  id: number;
+  id: string;
   paymentHash: string;
   preimage?: string;
   secret?: string;
   status: string;
   origin: string;
   amtMsat?: number;
-  createdAt: string;
-  updatedAt: string;
+  feePaidMsat?: number;
+  createdAt: number;
+  updatedAt: number;
   label?: string;
   invoice?: string;
 }
@@ -314,7 +313,7 @@ class SenseiClient {
     return {
       pubkey: response.pubkey,
       macaroon: response.macaroon,
-      externalId: response.external_id,
+      id: response.id,
       role: response.role,
       token: response.token,
     };
@@ -355,7 +354,6 @@ class SenseiClient {
         return {
           id: token.id,
           token: token.token,
-          externalId: token.external_id,
           createdAt: token.created_at,
           updatedAt: token.updated_at,
           expiresAt: token.expires_at,
@@ -412,7 +410,6 @@ class SenseiClient {
       nodes: nodes.map((node: any) => {
         return {
           id: node.id,
-          externalId: node.external_id,
           role: node.role,
           username: node.username,
           alias: node.alias,
@@ -509,6 +506,7 @@ class SenseiClient {
           status: payment.status,
           origin: payment.origin,
           amtMsat: payment.amt_msat,
+          feePaidMsat: payment.fee_paid_msat,
           createdAt: payment.created_at,
           updatedAt: payment.updated_at,
           label: payment.label,
