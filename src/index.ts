@@ -7,6 +7,7 @@ export interface SenseiClientConfig {
 }
 
 export interface NodeStatus {
+  version: string;
   created: boolean;
   running: boolean;
   authenticated: boolean;
@@ -199,6 +200,7 @@ export interface BalanceInfo {
 }
 
 export interface NodeInfo {
+  version: string;
   nodePubkey: string;
   numChannels: number;
   numUsableChannels: number;
@@ -549,6 +551,7 @@ class SenseiClient {
     const { node_info } = await this.get(`${this.basePath}/v1/node/info`);
 
     return {
+      version: node_info.version,
       nodePubkey: node_info.node_pubkey,
       numChannels: node_info.num_channels,
       numUsableChannels: node_info.num_usable_channels,
