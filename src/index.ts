@@ -112,7 +112,27 @@ export interface BlockTime {
   timestamp: number;
 }
 
+export interface TransactionInput {
+  previous_output: string;
+  script_sig: string;
+  sequence: number[][];
+  witness: number[][];
+}
+
+export interface TransactionOutput {
+  value: number;
+  script_pubkey: string;
+}
+
+export interface Transaction {
+  version: number;
+  lock_time: number;
+  input: TransactionInput[];
+  output: TransactionOutput[];
+}
+
 export interface TransactionDetails {
+  transaction: Transaction;
   txid: string;
   received: number;
   sent: number;
@@ -475,6 +495,7 @@ class SenseiClient {
     return {
       transactions: transactions.map((transaction: any) => {
         return {
+          transaction: transaction.transaction,
           txid: transaction.txid,
           sent: transaction.sent,
           received: transaction.received,
