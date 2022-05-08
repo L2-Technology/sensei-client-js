@@ -113,20 +113,20 @@ export interface BlockTime {
 }
 
 export interface TransactionInput {
-  previous_output: string;
-  script_sig: string;
+  previousOutput: string;
+  scriptSig: string;
   sequence: number[][];
   witness: number[][];
 }
 
 export interface TransactionOutput {
   value: number;
-  script_pubkey: string;
+  scriptPubkey: string;
 }
 
 export interface Transaction {
   version: number;
-  lock_time: number;
+  lockTime: number;
   input: TransactionInput[];
   output: TransactionOutput[];
 }
