@@ -495,7 +495,20 @@ class SenseiClient {
     return {
       transactions: transactions.map((transaction: any) => {
         return {
-          transaction: transaction.transaction,
+          transaction: {
+            version: transaction.transaction.version,
+            lockTime: transaction.transaction.lock_time,
+            input: transaction.transaction.input.map((input: any) => ({
+              previousOutput: input.previous_output,
+              scriptSig: input.script_sig,
+              sequence: input.sequence,
+              witness: input.witness,
+            })),
+            output: transaction.transaction.output.map((output: any) => ({
+              value: output.value,
+              scriptPubkey: output.script_pubkey,
+            })),
+          },
           txid: transaction.txid,
           sent: transaction.sent,
           received: transaction.received,
