@@ -1,6 +1,6 @@
 # sensei-client-js
 
-A javascript client for the [Sensei](https://l2.technology/sensei) HTTP API. This is designed to work in the browser and in NodeJS environments. It is written in typescript and all endpoints are fully typed.
+A javascript client for the [Sensei](https://l2.technology/sensei) HTTP API. This is designed to work in the browser and in NodeJS environments. There are typescript types available for all endpoints.
 
 ## Installation
 

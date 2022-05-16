@@ -1,243 +1,19 @@
-import fetch from 'cross-fetch';
-
-export interface SenseiClientConfig {
-  basePath: string;
-  macaroon?: string;
-  token?: string;
-}
-
-export interface NodeStatus {
-  version: string;
-  created: boolean;
-  running: boolean;
-  authenticated: boolean;
-  alias?: string;
-  pubkey?: string;
-  username?: string;
-  role?: number;
-}
-
-export interface InitParams {
-  username: string;
-  alias: string;
-  passphrase: string;
-  start: boolean;
-}
-
-export interface InitResponse {
-  id: string;
-  pubkey: string;
-  macaroon: string;
-  token: string;
-  role: number;
-}
-
-export interface LoginResponse {
-  pubkey: string;
-  macaroon: string;
-  token: string;
-  alias: string;
-  role: number;
-}
-
-export interface NodeAuthInfo {
-  pubkey: string;
-  macaroon: string;
-}
-
-export interface CreateAccessTokenParams {
-  name: string;
-  scope: string;
-  expiresAt: number;
-  singleUse: boolean;
-}
-
-export interface AccessToken {
-  id: string;
-  createdAt: number;
-  updatedAt: number;
-  expiresAt: number;
-  singleUse: boolean;
-  name: string;
-  token: string;
-  scope: string;
-}
-
-export interface CreateNodeParams {
-  username: string;
-  alias: string;
-  passphrase: string;
-  start: boolean;
-}
-
-export interface Node {
-  id: string;
-  role: number;
-  username: string;
-  alias: string;
-  network: string;
-  listenAddr: string;
-  listenPort: number;
-  pubkey: string;
-  createdAt: number;
-  updatedAt: number;
-  status: number;
-}
-
-export interface Channel {
-  channelId: string;
-  fundingTxid?: string;
-  fundingTxIndex?: number;
-  shortChannelId?: number;
-  channelValueSatoshis: number;
-  balanceMsat: number;
-  unspendablePunishmentEeserve?: number;
-  userChannelId: number;
-  outboundCapacityMsat: number;
-  inboundCapacityMsat: number;
-  confirmationsRequired?: number;
-  forceCloseSpendDelay?: number;
-  isOutbound: boolean;
-  isFundingLocked: boolean;
-  isUsable: boolean;
-  isPublic: boolean;
-  counterpartyPubkey: string;
-  alias?: string;
-}
-
-export interface BlockTime {
-  height: number;
-  timestamp: number;
-}
-
-export interface TransactionDetails {
-  txid: string;
-  received: number;
-  sent: number;
-  fee?: number;
-  confirmationTime?: BlockTime;
-}
-
-export interface GetNodesResponse {
-  nodes: Node[];
-  pagination: PaginationResponse;
-}
-
-export interface GetAccessTokensResponse {
-  tokens: AccessToken[];
-  pagination: PaginationResponse;
-}
-
-export interface GetChannelsResponse {
-  channels: Channel[];
-  pagination: PaginationResponse;
-}
-
-export interface GetTransactionsResponse {
-  transactions: TransactionDetails[];
-  pagination: PaginationResponse;
-}
-
-export interface Payment {
-  id: string;
-  paymentHash: string;
-  preimage?: string;
-  secret?: string;
-  status: string;
-  origin: string;
-  amtMsat?: number;
-  feePaidMsat?: number;
-  createdAt: number;
-  updatedAt: number;
-  label?: string;
-  invoice?: string;
-}
-
-export interface GetPaymentsResponse {
-  payments: Payment[];
-  pagination: PaginationResponse;
-}
-
-export interface Peer {
-  nodePubkey: string;
-}
-
-export interface GetPeersResponse {
-  peers: Peer[];
-}
-
-export interface PaginationResponse {
-  hasMore: boolean;
-  total: number;
-}
-
-export interface PaginationParams {
-  page: number;
-  take: number;
-}
-
-export interface SearchableParams {
-  searchTerm: string;
-}
-
-export interface PaymentsFilter {
-  origin?: string;
-  status?: string;
-}
-
-export interface GetPaymentsParams {
-  filter?: PaymentsFilter;
-  pagination: ListParams;
-}
-
-export interface AddressInfo {
-  address: string;
-}
-
-export interface BalanceInfo {
-  balanceSatoshis: number;
-}
-
-export interface NodeInfo {
-  version: string;
-  nodePubkey: string;
-  numChannels: number;
-  numUsableChannels: number;
-  numPeers: number;
-  localBalanceMsat: number;
-}
-
-export interface Invoice {
-  invoice: string;
-}
-
-export interface VerifyMessageResponse {
-  valid: boolean;
-  pubkey: string;
-}
-
-export type ListParams = PaginationParams & SearchableParams;
-
 class SenseiClient {
-  basePath: string;
-  macaroon?: string;
-  token?: string;
-
-  constructor({ basePath, macaroon, token }: SenseiClientConfig) {
+  constructor({ basePath, macaroon, token }) {
     this.basePath = basePath;
     this.macaroon = macaroon;
     this.token = token;
   }
 
-  setMacaroon(macaroon: string) {
+  setMacaroon(macaroon) {
     this.macaroon = macaroon;
   }
 
-  setToken(token: string) {
+  setToken(token) {
     this.token = token;
   }
 
-  async request(input: RequestInfo, init: RequestInit): Promise<any> {
+  async request(input, init) {
     if (!init.headers) {
       init.headers = {};
     }
@@ -256,19 +32,22 @@ class SenseiClient {
       };
     }
 
+    console.log(input);
+    console.log(init);
+
     return fetch(input, init)
-      .then((res: Response): Promise<any> => {
+      .then((res) => {
         if (res.status >= 400) {
           throw new Error('Bad response from server');
         }
         return res.json();
       })
-      .catch((err: Error): void => {
+      .catch((err) => {
         throw err;
       });
   }
 
-  post(url: string, body: Record<any, any>, additionalHeaders: Record<any, any> = {}): Promise<any> {
+  post(url, body, additionalHeaders = {}) {
     return this.request(url, {
       method: 'POST',
       headers: {
@@ -280,7 +59,7 @@ class SenseiClient {
     });
   }
 
-  delete(url: string, body: Record<any, any>, additionalHeaders: Record<any, any> = {}): Promise<any> {
+  delete(url, body, additionalHeaders = {}) {
     return this.request(url, {
       method: 'DELETE',
       headers: {
@@ -292,18 +71,18 @@ class SenseiClient {
     });
   }
 
-  get(url: string): Promise<any> {
+  get(url) {
     return this.request(url, {
       method: 'GET',
       credentials: 'include',
     });
   }
 
-  getStatus(): Promise<NodeStatus> {
+  getStatus() {
     return this.get(`${this.basePath}/v1/status`);
   }
 
-  async init({ username, alias, passphrase, start }: InitParams): Promise<InitResponse> {
+  async init({ username, alias, passphrase, start }) {
     const response = await this.post(`${this.basePath}/v1/init`, {
       username,
       alias,
@@ -319,38 +98,40 @@ class SenseiClient {
     };
   }
 
-  async login(username: string, passphrase: string): Promise<LoginResponse> {
+  async login(username, passphrase) {
     return this.post(`${this.basePath}/v1/login`, { username, passphrase });
   }
 
-  async logout(): Promise<void> {
+  async logout() {
     return this.post(`${this.basePath}/v1/logout`, {});
   }
 
-  async startAdmin(passphrase: string): Promise<NodeAuthInfo> {
+  async startAdmin(passphrase) {
     return this.post(`${this.basePath}/v1/start`, { passphrase });
   }
 
-  async stopAdmin(): Promise<void> {
+  async stopAdmin() {
     return this.get(`${this.basePath}/v1/stop`);
   }
 
-  async createAccessToken({ name, scope, singleUse, expiresAt }: CreateAccessTokenParams): Promise<AccessToken> {
-    return this.post(`${this.basePath}/v1/tokens`, {
+  async createAccessToken({ name, scope, singleUse, expiresAt }) {
+    const { token } = await this.post(`${this.basePath}/v1/tokens`, {
       name,
       scope,
       single_use: singleUse,
       expires_at: expiresAt,
     });
+
+    return token;
   }
 
-  async getAccessTokens({ page, searchTerm, take }: ListParams): Promise<GetAccessTokensResponse> {
+  async getAccessTokens({ page, searchTerm, take }) {
     const { tokens, pagination } = await this.get(
       `${this.basePath}/v1/tokens?page=${page}&take=${take}&query=${searchTerm}`,
     );
 
     return {
-      tokens: tokens.map((token: any) => {
+      tokens: tokens.map((token) => {
         return {
           id: token.id,
           token: token.token,
@@ -369,20 +150,28 @@ class SenseiClient {
     };
   }
 
-  async deleteAccessToken(id: number): Promise<void> {
+  async deleteAccessToken(id) {
     return this.delete(`${this.basePath}/v1/tokens`, { id });
   }
 
-  async createNode({ username, alias, passphrase, start }: CreateNodeParams): Promise<NodeAuthInfo> {
-    return this.post(`${this.basePath}/v1/nodes`, {
+  async createNode({ username, alias, passphrase, start }) {
+    let response = await this.post(`${this.basePath}/v1/nodes`, {
       username,
       alias,
       passphrase,
       start,
     });
+
+    return {
+      id: response.id,
+      pubkey: response.pubkey,
+      macaroon: response.macaroon,
+      listenAddress: response.listen_address,
+      listenPort: response.listen_port,
+    };
   }
 
-  async adminStartNode(pubkey: string, passphrase: string): Promise<NodeAuthInfo> {
+  async adminStartNode(pubkey, passphrase) {
     const response = await this.post(`${this.basePath}/v1/nodes/start`, {
       pubkey,
       passphrase,
@@ -393,21 +182,21 @@ class SenseiClient {
     };
   }
 
-  async adminStopNode(pubkey: string): Promise<void> {
+  async adminStopNode(pubkey) {
     return this.post(`${this.basePath}/v1/nodes/stop`, { pubkey });
   }
 
-  async deleteNode(pubkey: string): Promise<void> {
+  async deleteNode(pubkey) {
     return this.post(`${this.basePath}/v1/nodes/delete`, { pubkey });
   }
 
-  async getNodes({ page, searchTerm, take }: ListParams): Promise<GetNodesResponse> {
+  async getNodes({ page, searchTerm, take }) {
     const { nodes, pagination } = await this.get(
       `${this.basePath}/v1/nodes?page=${page}&take=${take}&query=${searchTerm}`,
     );
 
     return {
-      nodes: nodes.map((node: any) => {
+      nodes: nodes.map((node) => {
         return {
           id: node.id,
           role: node.role,
@@ -429,13 +218,13 @@ class SenseiClient {
     };
   }
 
-  async getChannels({ page, searchTerm, take }: ListParams): Promise<GetChannelsResponse> {
+  async getChannels({ page, searchTerm, take }) {
     const { channels, pagination } = await this.get(
       `${this.basePath}/v1/node/channels?page=${page}&take=${take}&query=${searchTerm}`,
     );
 
     return {
-      channels: channels.map((channel: any) => {
+      channels: channels.map((channel) => {
         return {
           channelId: channel.channel_id,
           fundingTxid: channel.funding_txid,
@@ -464,13 +253,13 @@ class SenseiClient {
     };
   }
 
-  async getTransactions({ page, searchTerm, take }: ListParams): Promise<GetTransactionsResponse> {
+  async getTransactions({ page, searchTerm, take }) {
     const { transactions, pagination } = await this.get(
       `${this.basePath}/v1/node/transactions?page=${page}&take=${take}&query=${searchTerm}`,
     );
 
     return {
-      transactions: transactions.map((transaction: any) => {
+      transactions: transactions.map((transaction) => {
         return {
           txid: transaction.txid,
           sent: transaction.sent,
@@ -486,7 +275,7 @@ class SenseiClient {
     };
   }
 
-  async getPayments({ filter = {}, pagination }: GetPaymentsParams): Promise<GetPaymentsResponse> {
+  async getPayments({ filter = {}, pagination }) {
     const { page, take, searchTerm } = pagination;
     const origin = filter.origin || '';
     const status = filter.status || '';
@@ -497,7 +286,7 @@ class SenseiClient {
 
     return {
       pagination: response.pagination,
-      payments: response.payments.map((payment: any) => {
+      payments: response.payments.map((payment) => {
         return {
           id: payment.id,
           paymentHash: payment.payment_hash,
@@ -516,11 +305,11 @@ class SenseiClient {
     };
   }
 
-  async getPeers(): Promise<GetPeersResponse> {
+  async getPeers() {
     const { peers } = await this.get(`${this.basePath}/v1/node/peers`);
 
     return {
-      peers: peers.map((peer: any) => {
+      peers: peers.map((peer) => {
         return {
           nodePubkey: peer.node_pubkey,
         };
@@ -528,29 +317,29 @@ class SenseiClient {
     };
   }
 
-  async getUnusedAddress(): Promise<AddressInfo> {
+  async getUnusedAddress() {
     const response = await this.get(`${this.basePath}/v1/node/wallet/address`);
     return {
       address: response.address,
     };
   }
 
-  async getBalance(): Promise<BalanceInfo> {
+  async getBalance() {
     const response = await this.get(`${this.basePath}/v1/node/wallet/balance`);
     return {
       balanceSatoshis: response.balance_satoshis,
     };
   }
 
-  async startNode(passphrase: string): Promise<void> {
+  async startNode(passphrase) {
     return this.post(`${this.basePath}/v1/node/start`, { passphrase });
   }
 
-  async stopNode(): Promise<void> {
+  async stopNode() {
     return this.get(`${this.basePath}/v1/node/stop`);
   }
 
-  async getInfo(): Promise<NodeInfo> {
+  async getInfo() {
     const { node_info } = await this.get(`${this.basePath}/v1/node/info`);
 
     return {
@@ -563,7 +352,7 @@ class SenseiClient {
     };
   }
 
-  async createInvoice(amountMillisats: number, description: string): Promise<Invoice> {
+  async createInvoice(amountMillisats, description) {
     const response = await this.post(`${this.basePath}/v1/node/invoices`, {
       amt_msat: amountMillisats,
       description,
@@ -574,24 +363,24 @@ class SenseiClient {
     };
   }
 
-  async labelPayment(label: string, paymentHash: string): Promise<void> {
+  async labelPayment(label, paymentHash) {
     return this.post(`${this.basePath}/v1/node/payments/label`, {
       label,
       payment_hash: paymentHash,
     });
   }
 
-  async deletePayment(paymentHash: string): Promise<void> {
+  async deletePayment(paymentHash) {
     return this.post(`${this.basePath}/v1/node/payments/delete`, {
       payment_hash: paymentHash,
     });
   }
 
-  async payInvoice(invoice: string): Promise<void> {
+  async payInvoice(invoice) {
     return this.post(`${this.basePath}/v1/node/invoices/pay`, { invoice });
   }
 
-  async openChannel(nodeConnectionString: string, amtSatoshis: number, isPublic: boolean): Promise<void> {
+  async openChannel(nodeConnectionString, amtSatoshis, isPublic) {
     return this.post(`${this.basePath}/v1/node/channels/open`, {
       node_connection_string: nodeConnectionString,
       amt_satoshis: amtSatoshis,
@@ -599,34 +388,34 @@ class SenseiClient {
     });
   }
 
-  async closeChannel(channelId: string, force: boolean): Promise<void> {
+  async closeChannel(channelId, force) {
     return this.post(`${this.basePath}/v1/node/channels/close`, {
       channel_id: channelId,
       force,
     });
   }
 
-  async keysend(destPubkey: string, amtMsat: number): Promise<void> {
+  async keysend(destPubkey, amtMsat) {
     return this.post(`${this.basePath}/v1/node/keysend`, {
       dest_pubkey: destPubkey,
       amt_msat: amtMsat,
     });
   }
 
-  async connectPeer(nodeConnectionString: string): Promise<void> {
+  async connectPeer(nodeConnectionString) {
     return this.post(`${this.basePath}/v1/node/peers/connect`, {
       node_connection_string: nodeConnectionString,
     });
   }
 
-  async signMessage(message: string): Promise<string> {
+  async signMessage(message) {
     const response = await this.post(`${this.basePath}/v1/node/sign/message`, {
       message,
     });
     return response.signature;
   }
 
-  async verifyMessage(message: string, signature: string): Promise<VerifyMessageResponse> {
+  async verifyMessage(message, signature) {
     return this.post(`${this.basePath}/v1/node/verify/message`, {
       message,
       signature,
@@ -634,4 +423,4 @@ class SenseiClient {
   }
 }
 
-export default SenseiClient;
+module.exports = SenseiClient;
