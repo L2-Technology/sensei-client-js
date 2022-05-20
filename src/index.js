@@ -381,11 +381,15 @@ class SenseiClient {
   }
 
   async openChannel(nodeConnectionString, amtSatoshis, isPublic) {
-    return this.post(`${this.basePath}/v1/node/channels/open`, {
+    const response = await this.post(`${this.basePath}/v1/node/channels/open`, {
       node_connection_string: nodeConnectionString,
       amt_satoshis: amtSatoshis,
       public: isPublic,
     });
+
+    return {
+      tempChannelId: response.temp_channel_id,
+    };
   }
 
   async closeChannel(channelId, force) {

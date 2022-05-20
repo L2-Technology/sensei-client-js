@@ -44,6 +44,9 @@ export interface CreateNodeResponse {
   listenAddress: string;
   listenPort: number;
 }
+export interface OpenChannelResponse {
+  tempChannelId: string;
+}
 export interface CreateAccessTokenParams {
   name: string;
   scope: string;
@@ -230,7 +233,7 @@ declare class SenseiClient {
   labelPayment(label: string, paymentHash: string): Promise<void>;
   deletePayment(paymentHash: string): Promise<void>;
   payInvoice(invoice: string): Promise<void>;
-  openChannel(nodeConnectionString: string, amtSatoshis: number, isPublic: boolean): Promise<void>;
+  openChannel(nodeConnectionString: string, amtSatoshis: number, isPublic: boolean): Promise<OpenChannelResponse>;
   closeChannel(channelId: string, force: boolean): Promise<void>;
   keysend(destPubkey: string, amtMsat: number): Promise<void>;
   connectPeer(nodeConnectionString: string): Promise<void>;
