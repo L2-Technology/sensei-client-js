@@ -154,6 +154,14 @@ class SenseiClient {
     return this.delete(`${this.basePath}/v1/tokens`, { id });
   }
 
+  async batchCreateNode(nodes) {
+    let response = await this.post(`${this.basePath}/v1/nodes/batch`, {
+      nodes,
+    });
+
+    return response.nodes;
+  }
+
   async createNode({ username, alias, passphrase, start }) {
     let response = await this.post(`${this.basePath}/v1/nodes`, {
       username,

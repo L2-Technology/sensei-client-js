@@ -37,6 +37,7 @@ export interface NodeAuthInfo {
   pubkey: string;
   macaroon: string;
 }
+
 export interface CreateNodeResponse {
   id: string;
   pubkey: string;
@@ -81,6 +82,7 @@ export interface AccessToken {
   token: string;
   scope: string;
 }
+
 export interface CreateNodeParams {
   username: string;
   alias: string;
@@ -234,6 +236,7 @@ declare class SenseiClient {
   getAccessTokens({ page, searchTerm, take }: ListParams): Promise<GetAccessTokensResponse>;
   deleteAccessToken(id: number): Promise<void>;
   createNode({ username, alias, passphrase, start }: CreateNodeParams): Promise<CreateNodeResponse>;
+  batchCreateNode(nodes: CreateNodeParams[]): Promise<CreateNodeResponse[]>;
   adminStartNode(pubkey: string, passphrase: string): Promise<NodeAuthInfo>;
   adminStopNode(pubkey: string): Promise<void>;
   deleteNode(pubkey: string): Promise<void>;
