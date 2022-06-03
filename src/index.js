@@ -382,13 +382,40 @@ class SenseiClient {
 
   async openChannel(nodeConnectionString, amtSatoshis, isPublic) {
     const response = await this.post(`${this.basePath}/v1/node/channels/open`, {
-      node_connection_string: nodeConnectionString,
-      amt_satoshis: amtSatoshis,
-      public: isPublic,
+      channels: [
+        {
+          node_connection_string: nodeConnectionString,
+          amt_satoshis: amtSatoshis,
+          public: isPublic,
+        },
+      ],
     });
 
     return {
-      tempChannelId: response.temp_channel_id,
+      tempChannelId: response.results[0].temp_channel_id,
+    };
+  }
+
+  async openChannels(channels) {
+    const response = await this.post(`${this.basePath}/v1/node/channels/open`, {
+      channels: channels.map((channel) => {
+        return {
+          node_connection_string: channel.nodeConnectionString,
+          public: channel.isPublic,
+          amt_satoshis: channel.amtSatoshis,
+        };
+      }),
+    });
+
+    return {
+      channels,
+      results: response.results.map((result) => {
+        return {
+          error: result.error,
+          errorMessage: result.error_message,
+          tempChannelId: result.temp_channel_id,
+        };
+      }),
     };
   }
 
