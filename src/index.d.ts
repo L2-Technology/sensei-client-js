@@ -46,10 +46,18 @@ export interface CreateNodeResponse {
   listenPort: number;
 }
 
-export interface OpenChannelInfo {
-  nodeConnectionString: string;
-  isPublic: boolean;
-  amtSatoshis: number;
+export interface OpenChannelRequest {
+  counterpartyPubkey: string;
+  public: boolean;
+  amountSats: number;
+  counterpartyHostAndPort?: string;
+  customId?: number;
+  pushAmountMsats?: number;
+  forwardingFeeProportionalMillionths?: number;
+  forwardingFeeBaseMsat?: number;
+  cltvExpiryDelta?: number;
+  maxDustHtlcExposureMsat?: number;
+  forceCloseAvoidanceMaxFeeSats?: number;
 }
 
 export interface OpenChannelResult {
@@ -59,7 +67,7 @@ export interface OpenChannelResult {
 }
 
 export interface OpenChannelsResponse {
-  channels: OpenChannelInfo[];
+  requests: OpenChannelRequest[];
   results: OpenChannelResult[];
 }
 
@@ -116,7 +124,7 @@ export interface Channel {
   confirmationsRequired?: number;
   forceCloseSpendDelay?: number;
   isOutbound: boolean;
-  isFundingLocked: boolean;
+  isChannelReady: boolean;
   isUsable: boolean;
   isPublic: boolean;
   counterpartyPubkey: string;
@@ -196,7 +204,12 @@ export interface AddressInfo {
   address: string;
 }
 export interface BalanceInfo {
-  balanceSatoshis: number;
+  onchainBalanceSats: number;
+  channelBalanceMsats: number;
+  channelOutboundCapacityMsats: number;
+  channelInboundCapacityMsats: number;
+  usableChannelOutboundCapacityMsats: number;
+  usableChannelInboundCapacityMsats: number;
 }
 export interface NodeInfo {
   version: string;
@@ -254,8 +267,8 @@ declare class SenseiClient {
   labelPayment(label: string, paymentHash: string): Promise<void>;
   deletePayment(paymentHash: string): Promise<void>;
   payInvoice(invoice: string): Promise<void>;
-  openChannel(nodeConnectionString: string, amtSatoshis: number, isPublic: boolean): Promise<OpenChannelResponse>;
-  openChannels(channels: OpenChannelInfo[]): Promise<OpenChannelsResponse>;
+  openChannel(channel: OpenChannelRequest): Promise<OpenChannelResult>;
+  openChannels(channels: OpenChannelRequest[]): Promise<OpenChannelsResponse>;
   closeChannel(channelId: string, force: boolean): Promise<void>;
   keysend(destPubkey: string, amtMsat: number): Promise<void>;
   connectPeer(nodeConnectionString: string): Promise<void>;

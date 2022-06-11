@@ -32,9 +32,6 @@ class SenseiClient {
       };
     }
 
-    console.log(input);
-    console.log(init);
-
     return fetch(input, init)
       .then((res) => {
         if (res.status >= 400) {
@@ -247,7 +244,7 @@ class SenseiClient {
           confirmationsRequired: channel.confirmations_required,
           forceCloseSpendDelay: channel.force_close_spend_delay,
           isOutbound: channel.is_outbound,
-          isFundingLocked: channel.is_funding_locked,
+          isChannelReady: channel.is_channel_ready,
           isUsable: channel.is_usable,
           isPublic: channel.is_public,
           counterpartyPubkey: channel.counterparty_pubkey,
@@ -335,7 +332,12 @@ class SenseiClient {
   async getBalance() {
     const response = await this.get(`${this.basePath}/v1/node/wallet/balance`);
     return {
-      balanceSatoshis: response.balance_satoshis,
+      onchainBalanceSats: response.onchain_balance_sats,
+      channelBalanceMsats: response.channel_balance_msats,
+      channelOutboundCapacityMsats: response.channel_outbound_capacity_msats,
+      channelInboundCapacityMsats: response.channel_inbound_capacity_msats,
+      usableChannelOutboundCapacityMsats: response.usable_channel_outbound_capacity_msats,
+      usableChannelInboundCapacityMsats: response.usable_channel_inbound_capacity_msats,
     };
   }
 
@@ -388,35 +390,49 @@ class SenseiClient {
     return this.post(`${this.basePath}/v1/node/invoices/pay`, { invoice });
   }
 
-  async openChannel(nodeConnectionString, amtSatoshis, isPublic) {
-    const response = await this.post(`${this.basePath}/v1/node/channels/open`, {
-      channels: [
-        {
-          node_connection_string: nodeConnectionString,
-          amt_satoshis: amtSatoshis,
-          public: isPublic,
-        },
-      ],
-    });
-
+  async openChannel(openChannelRequest) {
+    const response = await this.openChannels([openChannelRequest]);
+    const result = response.results[0];
     return {
-      tempChannelId: response.results[0].temp_channel_id,
+      error: result.error,
+      errorMessage: result.error_message,
+      tempChannelId: result.temp_channel_id,
     };
   }
 
-  async openChannels(channels) {
+  async openChannels(requests) {
     const response = await this.post(`${this.basePath}/v1/node/channels/open`, {
-      channels: channels.map((channel) => {
+      requests: requests.map((channel) => {
         return {
-          node_connection_string: channel.nodeConnectionString,
-          public: channel.isPublic,
-          amt_satoshis: channel.amtSatoshis,
+          counterparty_pubkey: channel.counterpartyPubkey,
+          public: channel.public,
+          amount_sats: channel.amountSats,
+          custom_id: channel.customId,
+          push_amount_msats: channel.pushAmountMsats,
+          forwarding_fee_proportional_millionths: channel.forwardingFeeProportionalMillionths,
+          forwarding_fee_base_msat: channel.forwardingFeeBaseMsat,
+          cltv_expiry_delta: channel.cltvExpiryDelta,
+          max_dust_htlc_exposure_msat: channel.maxDustHtlcExposureMsat,
+          force_close_avoidance_max_fee_sats: channel.forceCloseAvoidanceMaxFeeSats,
         };
       }),
     });
 
     return {
-      channels,
+      requests: response.requests.map((request) => {
+        return {
+          counterpartyPubkey: request.counterparty_pubkey,
+          public: request.public,
+          amountSats: request.amount_sats,
+          customId: request.custom_id,
+          pushAmountMsats: request.push_amount_msats,
+          forwardingFeeProportionalMillionths: request.forwarding_fee_proportional_millionths,
+          forwardingFeeBaseMsat: request.forwarding_fee_base_msat,
+          cltvExpiryDelta: request.cltv_expiry_delta,
+          maxDustHtlcExposureMsat: request.max_dust_htlc_exposure_msat,
+          forceCloseAvoidanceMaxFeeSats: request.force_close_avoidance_max_fee_sats,
+        };
+      }),
       results: response.results.map((result) => {
         return {
           error: result.error,
