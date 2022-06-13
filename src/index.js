@@ -478,6 +478,17 @@ class SenseiClient {
       signature,
     });
   }
+
+  async networkGraphInfo() {
+    const { num_channels, num_nodes, num_known_edge_policies } = await this.get(
+      `${this.basePath}/v1/node/network-graph/info`,
+    );
+    return {
+      numChannels: num_channels,
+      numNodes: num_nodes,
+      numKnownEdgePolicies: num_known_edge_policies,
+    };
+  }
 }
 
 module.exports = SenseiClient;

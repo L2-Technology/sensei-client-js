@@ -226,6 +226,13 @@ export interface VerifyMessageResponse {
   valid: boolean;
   pubkey: string;
 }
+
+export interface NetworkGraphInfo {
+  numChannels: number;
+  numNodes: number;
+  numKnownEdgePolicies: number;
+}
+
 export declare type ListParams = PaginationParams & SearchableParams;
 
 declare class SenseiClient {
@@ -274,5 +281,6 @@ declare class SenseiClient {
   connectPeer(nodeConnectionString: string): Promise<void>;
   signMessage(message: string): Promise<string>;
   verifyMessage(message: string, signature: string): Promise<VerifyMessageResponse>;
+  networkGraphInfo(): Promise<NetworkGraphInfo>;
 }
 export default SenseiClient;
