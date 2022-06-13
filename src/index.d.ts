@@ -50,7 +50,7 @@ export interface OpenChannelRequest {
   counterpartyPubkey: string;
   public: boolean;
   amountSats: number;
-  counterpartyHostAndPort?: string;
+  counterpartyHostPort?: string;
   customId?: number;
   pushAmountMsats?: number;
   forwardingFeeProportionalMillionths?: number;
