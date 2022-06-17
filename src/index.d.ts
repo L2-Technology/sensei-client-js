@@ -244,6 +244,17 @@ export interface GetKnownPeersResponse {
   pagination: PaginationResponse;
 }
 
+export interface DecodedInvoice {
+  paymentHash: string;
+  currency: string;
+  amount: number;
+  description: string;
+  expiry: number;
+  timestamp: number;
+  minFinalCltvExpiry: number;
+  payeePubKey: string;
+}
+
 export declare type ListParams = PaginationParams & SearchableParams;
 
 declare class SenseiClient {
@@ -282,6 +293,7 @@ declare class SenseiClient {
   stopNode(): Promise<void>;
   getInfo(): Promise<NodeInfo>;
   createInvoice(amountMillisats: number, description: string): Promise<Invoice>;
+  decodeInvoice(invoice: string): Promise<DecodedInvoice>;
   labelPayment(label: string, paymentHash: string): Promise<void>;
   deletePayment(paymentHash: string): Promise<void>;
   payInvoice(invoice: string): Promise<void>;

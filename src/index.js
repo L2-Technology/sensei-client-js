@@ -521,6 +521,21 @@ class SenseiClient {
   async removeKnownPeer(pubkey) {
     return this.delete(`${this.basePath}/v1/node/known-peers`, { pubkey });
   }
+
+  async decodeInvoice(invoice) {
+    const { invoice } = await this.post(`${this.basePath}/v1/node/invoices/decode`, { invoice });
+
+    return {
+      paymentHash: invoice.payment_hash,
+      currency: invoice.currency,
+      amount: invoice.amount,
+      description: invoice.description,
+      expiry: invoice.expiry,
+      timestamp: invoice.timestamp,
+      minFinalCltvExpiry: invoice.min_final_cltv_expiry,
+      payeePubKey: invoice.payee_pub_key,
+    };
+  }
 }
 
 module.exports = SenseiClient;
