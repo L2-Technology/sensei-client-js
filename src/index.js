@@ -523,17 +523,16 @@ class SenseiClient {
   }
 
   async decodeInvoice(invoice) {
-    const { invoice } = await this.post(`${this.basePath}/v1/node/invoices/decode`, { invoice });
-
+    const response = await this.post(`${this.basePath}/v1/node/invoices/decode`, { invoice });
     return {
-      paymentHash: invoice.payment_hash,
-      currency: invoice.currency,
-      amount: invoice.amount,
-      description: invoice.description,
-      expiry: invoice.expiry,
-      timestamp: invoice.timestamp,
-      minFinalCltvExpiry: invoice.min_final_cltv_expiry,
-      payeePubKey: invoice.payee_pub_key,
+      paymentHash: response.invoice.payment_hash,
+      currency: response.invoice.currency,
+      amount: response.invoice.amount,
+      description: response.invoice.description,
+      expiry: response.invoice.expiry,
+      timestamp: response.invoice.timestamp,
+      minFinalCltvExpiry: response.invoice.min_final_cltv_expiry,
+      payeePubKey: response.invoice.payee_pub_key,
     };
   }
 }
