@@ -233,6 +233,17 @@ export interface NetworkGraphInfo {
   numKnownEdgePolicies: number;
 }
 
+export interface KnownPeer {
+  pubkey: string;
+  label?: string;
+  zeroConf: boolean;
+}
+
+export interface GetKnownPeersResponse {
+  peers: KnownPeer[];
+  pagination: PaginationResponse;
+}
+
 export declare type ListParams = PaginationParams & SearchableParams;
 
 declare class SenseiClient {
@@ -282,5 +293,8 @@ declare class SenseiClient {
   signMessage(message: string): Promise<string>;
   verifyMessage(message: string, signature: string): Promise<VerifyMessageResponse>;
   networkGraphInfo(): Promise<NetworkGraphInfo>;
+  getKnownPeers({ page, searchTerm, take }: ListParams): Promise<GetKnownPeersResponse>;
+  addKnownPeer(pubkey: string, label: string, zeroConf: boolean): Promise<void>;
+  removeKnownPeer(pubkey: string): Promise<void>;
 }
 export default SenseiClient;

@@ -489,6 +489,38 @@ class SenseiClient {
       numKnownEdgePolicies: num_known_edge_policies,
     };
   }
+
+  async getKnownPeers({ page, searchTerm, take }) {
+    const { peers, pagination } = await this.get(
+      `${this.basePath}/v1/node/known-peers?page=${page}&take=${take}&query=${searchTerm}`,
+    );
+
+    return {
+      peers: peers.map((peer) => {
+        return {
+          pubkey: peer.pubkey,
+          label: peer.label || '',
+          zeroConf: peer.zero_conf,
+        };
+      }),
+      pagination: {
+        ...pagination,
+        hasMore: pagination.has_more,
+      },
+    };
+  }
+
+  async addKnownPeer(pubkey, label, zeroConf) {
+    return this.post(`${this.basePath}/v1/node/known-peers`, {
+      pubkey,
+      label,
+      zero_conf: zeroConf,
+    });
+  }
+
+  async removeKnownPeer(pubkey) {
+    return this.delete(`${this.basePath}/v1/node/known-peers`, { pubkey });
+  }
 }
 
 module.exports = SenseiClient;
