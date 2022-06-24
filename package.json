@@ -1,6 +1,6 @@
 {
   "name": "@l2-technology/sensei-client",
-  "version": "0.1.20",
+  "version": "0.1.21",
   "description": "A javascript client for the Sensei HTTP API",
   "main": "src/index.js",
   "types": "src/index.d.ts",

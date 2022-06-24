@@ -63,7 +63,7 @@ export interface OpenChannelRequest {
 export interface OpenChannelResult {
   error: boolean;
   errorMessage?: string;
-  tempChannelId?: string;
+  channelId?: string;
 }
 
 export interface OpenChannelsResponse {
@@ -72,7 +72,7 @@ export interface OpenChannelsResponse {
 }
 
 export interface OpenChannelResponse {
-  tempChannelId: string;
+  channelId: string;
 }
 export interface CreateAccessTokenParams {
   name: string;

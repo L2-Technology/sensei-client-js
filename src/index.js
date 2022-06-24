@@ -396,7 +396,7 @@ class SenseiClient {
     return {
       error: result.error,
       errorMessage: result.error_message,
-      tempChannelId: result.temp_channel_id,
+      channelId: result.channel_id,
     };
   }
 
@@ -439,7 +439,7 @@ class SenseiClient {
         return {
           error: result.error,
           errorMessage: result.error_message,
-          tempChannelId: result.temp_channel_id,
+          channelId: result.channel_id,
         };
       }),
     };
