@@ -33,9 +33,15 @@ class SenseiClient {
     }
 
     return fetch(input, init)
-      .then((res) => {
+      .then(async (res) => {
         if (res.status >= 400) {
-          throw new Error('Bad response from server');
+          let errorMessage = 'unknown error';
+          try {
+            let errorObject = await res.json();
+            errorMessage = errorObject['error'];
+          } catch (e) {}
+
+          throw new Error(errorMessage);
         }
         return res.json();
       })
@@ -392,12 +398,7 @@ class SenseiClient {
 
   async openChannel(openChannelRequest) {
     const response = await this.openChannels([openChannelRequest]);
-    const result = response.results[0];
-    return {
-      error: result.error,
-      errorMessage: result.error_message,
-      channelId: result.channel_id,
-    };
+    return response.results[0];
   }
 
   async openChannels(requests) {
