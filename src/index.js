@@ -81,44 +81,48 @@ class SenseiClient {
     });
   }
 
-  getStatus() {
-    return this.get(`${this.basePath}/v1/status`);
+  async getStatus() {
+    const response = await this.get(`${this.basePath}/api/v1/status`);
+    return {
+      version: response.version,
+      setup: response.setup,
+      authenticatedNode: response.authenticated_node,
+      authenticatedAdmin: response.authenticated_admin,
+      alias: response.alias,
+      pubkey: response.pubkey,
+      username: response.username,
+      role: response.role,
+    };
   }
 
-  async init({ username, alias, passphrase, start }) {
-    const response = await this.post(`${this.basePath}/v1/init`, {
+  async init({ username, passphrase }) {
+    const response = await this.post(`${this.basePath}/api/v1/init`, {
       username,
-      alias,
       passphrase,
-      start,
     });
     return {
-      pubkey: response.pubkey,
-      macaroon: response.macaroon,
-      id: response.id,
-      role: response.role,
       token: response.token,
     };
   }
 
-  async login(username, passphrase) {
-    return this.post(`${this.basePath}/v1/login`, { username, passphrase });
+  async loginAdmin(username, passphrase) {
+    return this.post(`${this.basePath}/api/v1/login`, { username, passphrase });
+  }
+
+  async loginNode(username, passphrase) {
+    return this.post(`${this.basePath}/api/v1/nodes/login`, { username, passphrase });
   }
 
   async logout() {
-    return this.post(`${this.basePath}/v1/logout`, {});
+    return this.post(`${this.basePath}/api/v1/logout`, {});
   }
 
-  async startAdmin(passphrase) {
-    return this.post(`${this.basePath}/v1/start`, { passphrase });
-  }
-
-  async stopAdmin() {
-    return this.get(`${this.basePath}/v1/stop`);
+  async stopInstance() {
+    return this.get(`${this.basePath}/api/v1/stop`);
   }
 
   async createAccessToken({ name, scope, singleUse, expiresAt }) {
-    const { token } = await this.post(`${this.basePath}/v1/tokens`, {
+    const { token } = await this.post(`${this.basePath}/api/v1/tokens`, {
       name,
       scope,
       single_use: singleUse,
@@ -130,7 +134,7 @@ class SenseiClient {
 
   async getAccessTokens({ page, searchTerm, take }) {
     const { tokens, pagination } = await this.get(
-      `${this.basePath}/v1/tokens?page=${page}&take=${take}&query=${searchTerm}`,
+      `${this.basePath}/api/v1/tokens?page=${page}&take=${take}&query=${searchTerm}`,
     );
 
     return {
@@ -154,11 +158,11 @@ class SenseiClient {
   }
 
   async deleteAccessToken(id) {
-    return this.delete(`${this.basePath}/v1/tokens`, { id });
+    return this.delete(`${this.basePath}/api/v1/tokens`, { id });
   }
 
   async batchCreateNode(nodes) {
-    let response = await this.post(`${this.basePath}/v1/nodes/batch`, {
+    let response = await this.post(`${this.basePath}/api/v1/nodes/batch`, {
       nodes,
     });
 
@@ -166,7 +170,7 @@ class SenseiClient {
   }
 
   async createNode({ username, alias, passphrase, start }) {
-    let response = await this.post(`${this.basePath}/v1/nodes`, {
+    let response = await this.post(`${this.basePath}/api/v1/nodes`, {
       username,
       alias,
       passphrase,
@@ -183,7 +187,7 @@ class SenseiClient {
   }
 
   async adminStartNode(pubkey, passphrase) {
-    const response = await this.post(`${this.basePath}/v1/nodes/start`, {
+    const response = await this.post(`${this.basePath}/api/v1/nodes/start`, {
       pubkey,
       passphrase,
     });
@@ -194,16 +198,16 @@ class SenseiClient {
   }
 
   async adminStopNode(pubkey) {
-    return this.post(`${this.basePath}/v1/nodes/stop`, { pubkey });
+    return this.post(`${this.basePath}/api/v1/nodes/stop`, { pubkey });
   }
 
   async deleteNode(pubkey) {
-    return this.post(`${this.basePath}/v1/nodes/delete`, { pubkey });
+    return this.post(`${this.basePath}/api/v1/nodes/delete`, { pubkey });
   }
 
   async getNodes({ page, searchTerm, take }) {
     const { nodes, pagination } = await this.get(
-      `${this.basePath}/v1/nodes?page=${page}&take=${take}&query=${searchTerm}`,
+      `${this.basePath}/api/v1/nodes?page=${page}&take=${take}&query=${searchTerm}`,
     );
 
     return {
@@ -231,7 +235,7 @@ class SenseiClient {
 
   async getChannels({ page, searchTerm, take }) {
     const { channels, pagination } = await this.get(
-      `${this.basePath}/v1/node/channels?page=${page}&take=${take}&query=${searchTerm}`,
+      `${this.basePath}/api/v1/node/channels?page=${page}&take=${take}&query=${searchTerm}`,
     );
 
     return {
@@ -266,7 +270,7 @@ class SenseiClient {
 
   async getTransactions({ page, searchTerm, take }) {
     const { transactions, pagination } = await this.get(
-      `${this.basePath}/v1/node/transactions?page=${page}&take=${take}&query=${searchTerm}`,
+      `${this.basePath}/api/v1/node/transactions?page=${page}&take=${take}&query=${searchTerm}`,
     );
 
     return {
@@ -292,7 +296,7 @@ class SenseiClient {
     const status = filter.status || '';
 
     const response = await this.get(
-      `${this.basePath}/v1/node/payments?page=${page}&take=${take}&query=${searchTerm}&origin=${origin}&status=${status}`,
+      `${this.basePath}/api/v1/node/payments?page=${page}&take=${take}&query=${searchTerm}&origin=${origin}&status=${status}`,
     );
 
     return {
@@ -317,7 +321,7 @@ class SenseiClient {
   }
 
   async getPeers() {
-    const { peers } = await this.get(`${this.basePath}/v1/node/peers`);
+    const { peers } = await this.get(`${this.basePath}/api/v1/node/peers`);
 
     return {
       peers: peers.map((peer) => {
@@ -329,14 +333,14 @@ class SenseiClient {
   }
 
   async getUnusedAddress() {
-    const response = await this.get(`${this.basePath}/v1/node/wallet/address`);
+    const response = await this.get(`${this.basePath}/api/v1/node/wallet/address`);
     return {
       address: response.address,
     };
   }
 
   async getBalance() {
-    const response = await this.get(`${this.basePath}/v1/node/wallet/balance`);
+    const response = await this.get(`${this.basePath}/api/v1/node/wallet/balance`);
     return {
       onchainBalanceSats: response.onchain_balance_sats,
       channelBalanceMsats: response.channel_balance_msats,
@@ -348,15 +352,15 @@ class SenseiClient {
   }
 
   async startNode(passphrase) {
-    return this.post(`${this.basePath}/v1/node/start`, { passphrase });
+    return this.post(`${this.basePath}/api/v1/node/start`, { passphrase });
   }
 
   async stopNode() {
-    return this.get(`${this.basePath}/v1/node/stop`);
+    return this.get(`${this.basePath}/api/v1/node/stop`);
   }
 
   async getInfo() {
-    const { node_info } = await this.get(`${this.basePath}/v1/node/info`);
+    const { node_info } = await this.get(`${this.basePath}/api/v1/node/info`);
 
     return {
       version: node_info.version,
@@ -369,7 +373,7 @@ class SenseiClient {
   }
 
   async createInvoice(amountMillisats, description) {
-    const response = await this.post(`${this.basePath}/v1/node/invoices`, {
+    const response = await this.post(`${this.basePath}/api/v1/node/invoices`, {
       amt_msat: amountMillisats,
       description,
     });
@@ -380,20 +384,20 @@ class SenseiClient {
   }
 
   async labelPayment(label, paymentHash) {
-    return this.post(`${this.basePath}/v1/node/payments/label`, {
+    return this.post(`${this.basePath}/api/v1/node/payments/label`, {
       label,
       payment_hash: paymentHash,
     });
   }
 
   async deletePayment(paymentHash) {
-    return this.post(`${this.basePath}/v1/node/payments/delete`, {
+    return this.post(`${this.basePath}/api/v1/node/payments/delete`, {
       payment_hash: paymentHash,
     });
   }
 
   async payInvoice(invoice) {
-    return this.post(`${this.basePath}/v1/node/invoices/pay`, { invoice });
+    return this.post(`${this.basePath}/api/v1/node/invoices/pay`, { invoice });
   }
 
   async openChannel(openChannelRequest) {
@@ -402,7 +406,7 @@ class SenseiClient {
   }
 
   async openChannels(requests) {
-    const response = await this.post(`${this.basePath}/v1/node/channels/open`, {
+    const response = await this.post(`${this.basePath}/api/v1/node/channels/open`, {
       requests: requests.map((channel) => {
         return {
           counterparty_pubkey: channel.counterpartyPubkey,
@@ -447,34 +451,34 @@ class SenseiClient {
   }
 
   async closeChannel(channelId, force) {
-    return this.post(`${this.basePath}/v1/node/channels/close`, {
+    return this.post(`${this.basePath}/api/v1/node/channels/close`, {
       channel_id: channelId,
       force,
     });
   }
 
   async keysend(destPubkey, amtMsat) {
-    return this.post(`${this.basePath}/v1/node/keysend`, {
+    return this.post(`${this.basePath}/api/v1/node/keysend`, {
       dest_pubkey: destPubkey,
       amt_msat: amtMsat,
     });
   }
 
   async connectPeer(nodeConnectionString) {
-    return this.post(`${this.basePath}/v1/node/peers/connect`, {
+    return this.post(`${this.basePath}/api/v1/node/peers/connect`, {
       node_connection_string: nodeConnectionString,
     });
   }
 
   async signMessage(message) {
-    const response = await this.post(`${this.basePath}/v1/node/sign/message`, {
+    const response = await this.post(`${this.basePath}/api/v1/node/sign/message`, {
       message,
     });
     return response.signature;
   }
 
   async verifyMessage(message, signature) {
-    return this.post(`${this.basePath}/v1/node/verify/message`, {
+    return this.post(`${this.basePath}/api/v1/node/verify/message`, {
       message,
       signature,
     });
@@ -482,7 +486,7 @@ class SenseiClient {
 
   async networkGraphInfo() {
     const { num_channels, num_nodes, num_known_edge_policies } = await this.get(
-      `${this.basePath}/v1/node/network-graph/info`,
+      `${this.basePath}/api/v1/node/network-graph/info`,
     );
     return {
       numChannels: num_channels,
@@ -493,7 +497,7 @@ class SenseiClient {
 
   async getKnownPeers({ page, searchTerm, take }) {
     const { peers, pagination } = await this.get(
-      `${this.basePath}/v1/node/known-peers?page=${page}&take=${take}&query=${searchTerm}`,
+      `${this.basePath}/api/v1/node/known-peers?page=${page}&take=${take}&query=${searchTerm}`,
     );
 
     return {
@@ -512,7 +516,7 @@ class SenseiClient {
   }
 
   async addKnownPeer(pubkey, label, zeroConf) {
-    return this.post(`${this.basePath}/v1/node/known-peers`, {
+    return this.post(`${this.basePath}/api/v1/node/known-peers`, {
       pubkey,
       label,
       zero_conf: zeroConf,
@@ -520,11 +524,11 @@ class SenseiClient {
   }
 
   async removeKnownPeer(pubkey) {
-    return this.delete(`${this.basePath}/v1/node/known-peers`, { pubkey });
+    return this.delete(`${this.basePath}/api/v1/node/known-peers`, { pubkey });
   }
 
   async decodeInvoice(invoice) {
-    const response = await this.post(`${this.basePath}/v1/node/invoices/decode`, { invoice });
+    const response = await this.post(`${this.basePath}/api/v1/node/invoices/decode`, { invoice });
     return {
       paymentHash: response.invoice.payment_hash,
       currency: response.invoice.currency,

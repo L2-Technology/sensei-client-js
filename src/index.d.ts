@@ -3,36 +3,34 @@ export interface SenseiClientConfig {
   macaroon?: string;
   token?: string;
 }
-export interface NodeStatus {
+
+export interface SenseiStatus {
   version: string;
-  created: boolean;
-  running: boolean;
-  authenticated: boolean;
+  setup: boolean;
+  authenticatedAdmin: boolean;
+  authenticatedNode: boolean;
+  username?: string;
   alias?: string;
   pubkey?: string;
-  username?: string;
   role?: number;
 }
 export interface InitParams {
   username: string;
-  alias: string;
   passphrase: string;
-  start: boolean;
 }
 export interface InitResponse {
-  id: string;
-  pubkey: string;
-  macaroon: string;
   token: string;
-  role: number;
 }
-export interface LoginResponse {
+export interface LoginNodeResponse {
   pubkey: string;
   macaroon: string;
-  token: string;
   alias: string;
   role: number;
 }
+export interface LoginAdminResponse {
+  token: string;
+}
+
 export interface NodeAuthInfo {
   pubkey: string;
   macaroon: string;
@@ -268,12 +266,12 @@ declare class SenseiClient {
   post(url: string, body: Record<any, any>, additionalHeaders?: Record<any, any>): Promise<any>;
   delete(url: string, body: Record<any, any>, additionalHeaders?: Record<any, any>): Promise<any>;
   get(url: string): Promise<any>;
-  getStatus(): Promise<NodeStatus>;
-  init({ username, alias, passphrase, start }: InitParams): Promise<InitResponse>;
-  login(username: string, passphrase: string): Promise<LoginResponse>;
+  getStatus(): Promise<SenseiStatus>;
+  init({ username, passphrase }: InitParams): Promise<InitResponse>;
+  loginAdmin(username: string, passphrase: string): Promise<LoginAdminResponse>;
+  loginNode(username: string, passphrase: string): Promise<LoginNodeResponse>;
   logout(): Promise<void>;
-  startAdmin(passphrase: string): Promise<NodeAuthInfo>;
-  stopAdmin(): Promise<void>;
+  stopInstance(): Promise<void>;
   createAccessToken({ name, scope, singleUse, expiresAt }: CreateAccessTokenParams): Promise<AccessToken>;
   getAccessTokens({ page, searchTerm, take }: ListParams): Promise<GetAccessTokensResponse>;
   deleteAccessToken(id: number): Promise<void>;
