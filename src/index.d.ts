@@ -42,6 +42,8 @@ export interface CreateNodeResponse {
   macaroon: string;
   listenAddress: string;
   listenPort: number;
+  entropy: string;
+  crossNodeEntropy: string;
 }
 
 export interface OpenChannelRequest {
@@ -94,7 +96,10 @@ export interface CreateNodeParams {
   alias: string;
   passphrase: string;
   start: boolean;
+  entropy?: string;
+  crossNodeEntropy?: string;
 }
+
 export interface Node {
   id: string;
   role: number;
@@ -157,6 +162,9 @@ export interface GetTransactionsResponse {
 }
 export interface Payment {
   id: string;
+  nodeId: string;
+  createdByNodeId: string;
+  receivedByNodeId?: string;
   paymentHash: string;
   preimage?: string;
   secret?: string;
@@ -284,6 +292,7 @@ declare class SenseiClient {
   getChannels({ page, searchTerm, take }: ListParams): Promise<GetChannelsResponse>;
   getTransactions({ page, searchTerm, take }: ListParams): Promise<GetTransactionsResponse>;
   getPayments({ filter, pagination }: GetPaymentsParams): Promise<GetPaymentsResponse>;
+  getPhantomPayments({ filter, pagination }: GetPaymentsParams): Promise<GetPaymentsResponse>;
   getPeers(): Promise<GetPeersResponse>;
   getUnusedAddress(): Promise<AddressInfo>;
   getBalance(): Promise<BalanceInfo>;
@@ -291,6 +300,8 @@ declare class SenseiClient {
   stopNode(): Promise<void>;
   getInfo(): Promise<NodeInfo>;
   createInvoice(amountMillisats: number, description: string): Promise<Invoice>;
+  getPhantomRouteHints(): Promise<string>;
+  createPhantomInvoice(amountMillisats: number, description: string, phantomRouteHintsHex: string[]): Promise<Invoice>;
   decodeInvoice(invoice: string): Promise<DecodedInvoice>;
   labelPayment(label: string, paymentHash: string): Promise<void>;
   deletePayment(paymentHash: string): Promise<void>;

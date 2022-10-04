@@ -169,12 +169,14 @@ class SenseiClient {
     return response.nodes;
   }
 
-  async createNode({ username, alias, passphrase, start }) {
+  async createNode({ username, alias, passphrase, start, entropy, crossNodeEntropy }) {
     let response = await this.post(`${this.basePath}/api/v1/nodes`, {
       username,
       alias,
       passphrase,
       start,
+      entropy,
+      cross_node_entropy: crossNodeEntropy,
     });
 
     return {
@@ -183,6 +185,8 @@ class SenseiClient {
       macaroon: response.macaroon,
       listenAddress: response.listen_address,
       listenPort: response.listen_port,
+      entropy: response.entropy,
+      crossNodeEntropy: response.cross_node_entropy,
     };
   }
 
@@ -315,6 +319,42 @@ class SenseiClient {
           updatedAt: payment.updated_at,
           label: payment.label,
           invoice: payment.invoice,
+          nodeId: payment.node_id,
+          createdByNodeId: payment.created_by_node_id,
+          receivedByNodeId: payment.received_by_node_id,
+        };
+      }),
+    };
+  }
+
+  async getPhantomPayments({ filter = {}, pagination }) {
+    const { page, take, searchTerm } = pagination;
+    const origin = filter.origin || '';
+    const status = filter.status || '';
+
+    const response = await this.get(
+      `${this.basePath}/api/v1/node/phantom-payments?page=${page}&take=${take}&query=${searchTerm}&origin=${origin}&status=${status}`,
+    );
+
+    return {
+      pagination: response.pagination,
+      payments: response.payments.map((payment) => {
+        return {
+          id: payment.id,
+          paymentHash: payment.payment_hash,
+          preimage: payment.preimage,
+          secret: payment.secret,
+          status: payment.status,
+          origin: payment.origin,
+          amtMsat: payment.amt_msat,
+          feePaidMsat: payment.fee_paid_msat,
+          createdAt: payment.created_at,
+          updatedAt: payment.updated_at,
+          label: payment.label,
+          invoice: payment.invoice,
+          nodeId: payment.node_id,
+          createdByNodeId: payment.created_by_node_id,
+          receivedByNodeId: payment.received_by_node_id,
         };
       }),
     };
@@ -381,6 +421,23 @@ class SenseiClient {
     return {
       invoice: response.invoice,
     };
+  }
+
+  async createPhantomInvoice(amountMillisats, description, phantomRouteHintsHex) {
+    const response = await this.post(`${this.basePath}/api/v1/node/invoices/phantom`, {
+      amt_msat: amountMillisats,
+      description,
+      phantom_route_hints_hex: phantomRouteHintsHex,
+    });
+
+    return {
+      invoice: response.invoice,
+    };
+  }
+
+  async getPhantomRouteHints() {
+    const { phantom_route_hints_hex } = await this.get(`${this.basePath}/api/v1/node/ldk/phantom-route-hints`);
+    return phantom_route_hints_hex;
   }
 
   async labelPayment(label, paymentHash) {
