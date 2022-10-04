@@ -38,7 +38,6 @@ export interface NodeAuthInfo {
 
 export interface CreateNodeResponse {
   id: string;
-  pubkey: string;
   macaroon: string;
   listenAddress: string;
   listenPort: number;
@@ -108,7 +107,6 @@ export interface Node {
   network: string;
   listenAddr: string;
   listenPort: number;
-  pubkey: string;
   createdAt: number;
   updatedAt: number;
   status: number;

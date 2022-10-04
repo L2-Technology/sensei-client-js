@@ -181,7 +181,6 @@ class SenseiClient {
 
     return {
       id: response.id,
-      pubkey: response.pubkey,
       macaroon: response.macaroon,
       listenAddress: response.listen_address,
       listenPort: response.listen_port,
@@ -224,7 +223,6 @@ class SenseiClient {
           network: node.network,
           listenAddr: node.listen_addr,
           listenPort: node.listen_port,
-          pubkey: node.pubkey,
           createdAt: node.created_at,
           updatedAt: node.updated_at,
           status: node.status,
